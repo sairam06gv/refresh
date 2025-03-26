@@ -28,7 +28,7 @@
                 return;
             }
             startIframes();
-            interval = setInterval(startIframes, 30000);
+            interval = setInterval(startIframes, 40000);
         });
 
         document.getElementById("stop").addEventListener("click", () => {
@@ -47,7 +47,12 @@
                         let script = document.createElement('script');
                         script.innerHTML = `
                             setTimeout(() => {
-                                document.body.click();
+                                let event = new MouseEvent('click', {
+                                    bubbles: true,
+                                    cancelable: true,
+                                    view: window
+                                });
+                                document.body.dispatchEvent(event);
                             }, 10000);
                         `;
                         iframe.contentWindow.document.body.appendChild(script);
