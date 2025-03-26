@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Refresh Iframes</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        #container { margin-top: 20px; display: flex; flex-wrap: wrap; justify-content: center; }
+        iframe { width: 30%; height: 300px; margin: 10px; border: none; }
+    </style>
+</head>
+<body>
+    <input type="text" id="website" placeholder="Enter website URL" />
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+    <div id="container"></div>
+
+    <script>
+        let interval;
+        let websiteUrl;
+        const container = document.getElementById("container");
+
+        document.getElementById("start").addEventListener("click", () => {
+            websiteUrl = document.getElementById("website").value.trim();
+            if (!websiteUrl.startsWith("http")) {
+                alert("Please enter a valid website URL including http or https");
+                return;
+            }
+            startIframes();
+            interval = setInterval(startIframes, 30000);
+        });
+
+        document.getElementById("stop").addEventListener("click", () => {
+            clearInterval(interval);
+            container.innerHTML = "";
+        });
+
+        function startIframes() {
+            container.innerHTML = "";
+            for (let i = 0; i < 6; i++) {
+                let iframe = document.createElement("iframe");
+                iframe.src = websiteUrl;
+                iframe.sandbox = "allow-scripts allow-same-origin";
+                iframe.onload = () => {
+                    try {
+                        let script = document.createElement('script');
+                        script.innerHTML = `
+                            setTimeout(() => {
+                                document.body.click();
+                            }, 10000);
+                        `;
+                        iframe.contentWindow.document.body.appendChild(script);
+                    } catch (e) {
+                        console.log("Click action not allowed in cross-origin frame.");
+                    }
+                };
+                container.appendChild(iframe);
+            }
+        }
+    </script>
+</body>
+</html>
