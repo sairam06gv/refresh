@@ -36,33 +36,48 @@
             container.innerHTML = "";
         });
 
-        function startIframes() {
-            container.innerHTML = "";
-            for (let i = 0; i < 6; i++) {
-                let iframe = document.createElement("iframe");
-                iframe.src = websiteUrl;
-                iframe.sandbox = "allow-scripts allow-same-origin";
-                iframe.onload = () => {
-                    try {
-                        let script = document.createElement('script');
-                        script.innerHTML = `
-                            setTimeout(() => {
-                                let event = new MouseEvent('click', {
-                                    bubbles: true,
-                                    cancelable: true,
-                                    view: window
-                                });
-                                document.body.dispatchEvent(event);
-                            }, 10000);
-                        `;
-                        iframe.contentWindow.document.body.appendChild(script);
-                    } catch (e) {
-                        console.log("Click action not allowed in cross-origin frame.");
-                    }
-                };
-                container.appendChild(iframe);
+       let clickCounter = 0; // To track clicks
+
+function startIframes() {
+    container.innerHTML = "";
+    for (let i = 0; i < 6; i++) {
+        let iframe = document.createElement("iframe");
+        iframe.src = websiteUrl;
+        iframe.sandbox = "allow-scripts allow-same-origin";
+        iframe.onload = () => {
+            try {
+                let script = document.createElement('script');
+                script.innerHTML = `
+                    setTimeout(() => {
+                        let event = new MouseEvent('click', {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        });
+                        document.body.dispatchEvent(event);
+                        window.parent.postMessage("iframeClick", "*");
+                    }, 2000);
+                `;
+                iframe.contentWindow.document.body.appendChild(script);
+            } catch (e) {
+                console.log("Click action not allowed in cross-origin frame.");
             }
-        }
+        };
+        container.appendChild(iframe);
+    }
+}
+
+// Listen for click events from iframes
+window.addEventListener("message", (event) => {
+    if (event.data === "iframeClick") {
+        clickCounter++;
+        console.log(`Click performed inside an iframe. Total clicks: ${clickCounter}`);
+    }
+});
+
+
+        
+        
     </script>
 </body>
 </html>
